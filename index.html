@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log Calorie</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #c8f96a;
+    --text: #f0f0f0;
+    --muted: #555;
+    --danger: #f96a6a;
+    --p: #6ab4f9;
+    --c: #f9c46a;
+    --g: #f96ac8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    min-height: 100vh; padding: 20px 16px 80px;
+    max-width: 520px; margin: 0 auto;
+  }
+  .section-title { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  h1 { font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  h1 span { color: var(--accent); }
+  .sep { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* GOALS */
+  .goals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 28px; }
+  .goal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; }
+  .goal-card.full { grid-column: 1 / -1; }
+  .gc-label { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .gc-val { font-size: 18px; font-weight: 700; }
+  .gc-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .gc-bar-track { height: 3px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .gc-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+  .gc-bar-fill.over { background: var(--danger) !important; }
+  .gc-kcal .gc-val { color: var(--accent); } .gc-kcal .gc-bar-fill { background: var(--accent); }
+  .gc-p .gc-val { color: var(--p); } .gc-p .gc-bar-fill { background: var(--p); }
+  .gc-c .gc-val { color: var(--c); } .gc-c .gc-bar-fill { background: var(--c); }
+  .gc-g .gc-val { color: var(--g); } .gc-g .gc-bar-fill { background: var(--g); }
+
+  /* CATALOG */
+  .catalog-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .chip { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px 10px 16px; font-size: 14px; cursor: pointer; transition: border-color 0.15s; }
+  .chip:hover { border-color: var(--accent); }
+  .chip .chip-kcal { color: var(--accent); font-weight: 700; }
+  .chip-edit-btn, .chip-del-btn { background: none; border: none; cursor: pointer; padding: 0; line-height: 1; color: var(--muted); transition: color 0.15s; }
+  .chip-edit-btn { font-size: 15px; } .chip-edit-btn:hover { color: var(--accent); }
+  .chip-del-btn { font-size: 13px; } .chip-del-btn:hover { color: var(--danger); }
+
+  .cat-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; display: none; flex-direction: column; gap: 10px; }
+  .cat-panel.open { display: flex; }
+  .cat-panel input { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: inherit; font-size: 13px; padding: 7px 10px; width: 100%; outline: none; transition: border-color 0.15s; }
+  .cat-panel input:focus { border-color: var(--accent); }
+  .cat-panel input::placeholder { color: var(--muted); }
+  .cat-panel .mi { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .cat-panel .mi input { text-align: center; }
+  .cat-panel-row { display: flex; gap: 8px; }
+  .btn-primary { flex: 1; background: var(--accent); color: #0f0f0f; border: none; border-radius: 4px; font-family: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px; cursor: pointer; opacity: 1; transition: opacity 0.15s; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary { background: none; border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: inherit; font-size: 11px; padding: 8px 12px; cursor: pointer; transition: border-color 0.15s; }
+  .btn-secondary:hover { border-color: var(--danger); color: var(--danger); }
+  .btn-dashed { background: none; border: 1px dashed var(--border); border-radius: 6px; color: var(--muted); font-family: inherit; font-size: 11px; padding: 8px; width: 100%; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
+  .btn-dashed:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* DATE TABS */
+  .dates { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .dates::-webkit-scrollbar { display: none; }
+  .date-tab { flex-shrink: 0; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px; cursor: pointer; background: none; color: var(--muted); font-family: inherit; transition: all 0.15s; }
+  .date-tab.active { border-color: var(--accent); color: var(--accent); }
+  .date-tab:hover:not(.active) { border-color: #444; color: var(--text); }
+
+  /* SUMMARY */
+  .summary { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+  .macro { text-align: center; }
+  .macro .val { font-size: 20px; font-weight: 700; line-height: 1.1; }
+  .macro .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .macro.kcal .val { color: var(--accent); } .macro.prot .val { color: var(--p); } .macro.carb .val { color: var(--c); } .macro.fat .val { color: var(--g); }
+
+  /* TOP BAR */
+  .goal-bar-wrap { margin-bottom: 20px; }
+  .goal-bar-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .goal-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
+  .goal-bar-fill.over { background: var(--danger); }
+  .goal-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 5px; }
+
+  /* ADD FORM */
+  .add-form { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .add-form input { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: inherit; font-size: 13px; padding: 8px 10px; width: 100%; outline: none; transition: border-color 0.15s; }
+  .add-form input:focus { border-color: var(--accent); }
+  .add-form input::placeholder { color: var(--muted); }
+  .add-form .mi { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .add-form .mi input { text-align: center; }
+
+  /* ENTRIES */
+  .entries { display: flex; flex-direction: column; gap: 6px; }
+  .entry { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .entry:hover { border-color: #333; }
+  .entry-row { padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
+  .entry-left { flex: 1; min-width: 0; }
+  .entry-name { font-size: 13px; margin-bottom: 6px; }
+  .entry-bars { display: flex; flex-direction: column; gap: 3px; }
+  .entry-bar-row { display: flex; align-items: center; gap: 6px; }
+  .entry-bar-label { font-size: 9px; width: 28px; color: var(--muted); }
+  .entry-bar-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .entry-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+  .entry-bar-fill.over { background: var(--danger) !important; }
+  .bar-kcal { background: var(--accent); } .bar-p { background: var(--p); } .bar-c { background: var(--c); } .bar-g { background: var(--g); }
+  .entry-bar-pct { font-size: 9px; color: var(--muted); width: 28px; text-align: right; }
+  .entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .entry-kcal { font-size: 13px; color: var(--accent); font-weight: 700; }
+  .entry-macros { font-size: 10px; color: var(--muted); }
+  .entry-macros .p { color: var(--p); } .entry-macros .c { color: var(--c); } .entry-macros .g { color: var(--g); }
+  .entry-actions { display: flex; gap: 4px; }
+  .edit-btn, .del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 2px 4px; transition: color 0.15s; }
+  .edit-btn:hover { color: var(--accent); } .del-btn:hover { color: var(--danger); }
+
+  .entry-edit-form { display: none; padding: 10px 14px 12px; border-top: 1px solid var(--border); flex-direction: column; gap: 8px; background: #111; }
+  .entry-edit-form.open { display: flex; }
+  .entry-edit-form input { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: inherit; font-size: 12px; padding: 6px 8px; outline: none; width: 100%; transition: border-color 0.15s; }
+  .entry-edit-form input:focus { border-color: var(--accent); }
+  .entry-edit-form input::placeholder { color: var(--muted); }
+  .edit-macro-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+  .edit-macro-row input { text-align: center; }
+  .edit-actions { display: flex; gap: 6px; }
+
+  .empty { color: var(--muted); font-size: 12px; text-align: center; padding: 24px 0; }
+  .goal-setting { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--muted); }
+  .goal-setting input { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: inherit; font-size: 12px; padding: 5px 8px; width: 80px; outline: none; }
+  .goal-setting input:focus { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<h1>Log <span>kcal</span></h1>
+
+<!-- GOALS -->
+<div class="section-title">obiettivi</div>
+<div class="goals-grid">
+  <div class="goal-card full gc-kcal">
+    <div class="gc-label">TDEE / kcal</div>
+    <div class="gc-val" id="gc-kcal-val">0 / 1900</div>
+    <div class="gc-sub" id="gc-kcal-rem">1900 kcal rimanenti</div>
+    <div class="gc-bar-track"><div class="gc-bar-fill" id="gc-kcal-bar" style="width:0%"></div></div>
+  </div>
+  <div class="goal-card gc-p">
+    <div class="gc-label">Proteine</div>
+    <div class="gc-val" id="gc-p-val">0 / 135g</div>
+    <div class="gc-sub" id="gc-p-rem">135g rimanenti</div>
+    <div class="gc-bar-track"><div class="gc-bar-fill" id="gc-p-bar" style="width:0%"></div></div>
+  </div>
+  <div class="goal-card gc-c">
+    <div class="gc-label">Carboidrati</div>
+    <div class="gc-val" id="gc-c-val">0 / 200g</div>
+    <div class="gc-sub" id="gc-c-rem">200g rimanenti</div>
+    <div class="gc-bar-track"><div class="gc-bar-fill" id="gc-c-bar" style="width:0%"></div></div>
+  </div>
+  <div class="goal-card gc-g">
+    <div class="gc-label">Grassi</div>
+    <div class="gc-val" id="gc-g-val">0 / 50g</div>
+    <div class="gc-sub" id="gc-g-rem">50g rimanenti</div>
+    <div class="gc-bar-track"><div class="gc-bar-fill" id="gc-g-bar" style="width:0%"></div></div>
+  </div>
+</div>
+
+<hr class="sep">
+
+<!-- CATALOGO -->
+<div class="section-title">frequenti</div>
+<div class="catalog-chips" id="catalogChips"></div>
+<div class="cat-panel" id="catPanel">
+  <input type="text" id="catName" placeholder="nome alimento" />
+  <input type="number" id="catKcal" placeholder="kcal" min="0" />
+  <div class="mi">
+    <input type="number" id="catP" placeholder="P (g)" min="0" />
+    <input type="number" id="catC" placeholder="C (g)" min="0" />
+    <input type="number" id="catG" placeholder="G (g)" min="0" />
+  </div>
+  <div class="cat-panel-row">
+    <button class="btn-primary" onclick="saveCatItem()">salva</button>
+    <button class="btn-secondary" onclick="closeCatPanel()">annulla</button>
+  </div>
+</div>
+<button class="btn-dashed" id="btnNewCat" onclick="openNewCat()" style="margin-bottom:0">+ nuovo alimento frequente</button>
+
+<hr class="sep">
+
+<!-- DATE TABS -->
+<div class="dates" id="dateTabs"></div>
+
+<!-- SUMMARY -->
+<div class="summary">
+  <div class="macro kcal"><div class="val" id="totalKcal">0</div><div class="lbl">kcal</div></div>
+  <div class="macro prot"><div class="val" id="totalP">0g</div><div class="lbl">prot</div></div>
+  <div class="macro carb"><div class="val" id="totalC">0g</div><div class="lbl">carb</div></div>
+  <div class="macro fat"><div class="val" id="totalG">0g</div><div class="lbl">gras</div></div>
+</div>
+
+<!-- TOP BAR -->
+<div class="goal-bar-wrap">
+  <div class="goal-label"><span>0</span><span id="goalLabel">TDEE: 1900 kcal</span></div>
+  <div class="goal-bar-track"><div class="goal-bar-fill" id="goalBar" style="width:0%"></div></div>
+</div>
+
+<!-- ADD -->
+<button class="btn-dashed" id="btnAddFood" onclick="toggleAddForm()" style="margin-bottom:16px">+ aggiungi alimento</button>
+<div class="add-form" id="addForm" style="display:none">
+  <input type="text" id="foodName" placeholder="alimento (es. pollo 200g)" />
+  <input type="number" id="foodKcal" placeholder="kcal" min="0" />
+  <div class="mi">
+    <input type="number" id="foodP" placeholder="P (g)" min="0" />
+    <input type="number" id="foodC" placeholder="C (g)" min="0" />
+    <input type="number" id="foodG" placeholder="G (g)" min="0" />
+  </div>
+  <button class="btn-primary" onclick="addEntry()">aggiungi</button>
+</div>
+
+<!-- LOG -->
+<div class="section-title" style="margin-bottom:10px">log del giorno</div>
+<div class="entries" id="entries">
+  <div class="empty" id="emptyMsg">nessun alimento per oggi</div>
+</div>
+
+<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px;">
+  <button class="btn-primary" onclick="exportData()" style="font-size:10px;padding:8px">⬇ esporta dati</button>
+  <label class="btn-secondary" style="cursor:pointer;font-size:10px;padding:8px 12px">
+    ⬆ importa dati
+    <input type="file" accept=".json" onchange="importData(event)" style="display:none" />
+  </label>
+</div>
+
+<div class="goal-setting">
+  <span>TDEE:</span>
+  <input type="number" id="goalInput" value="1900" min="500" max="9999" onchange="updateGoal()" />
+  <span>kcal</span>
+</div>
+
+<script>
+  const GOALS = { p: 135, c: 200, g: 50 };
+
+  // ── DATE UTILS (locale, no UTC) ──
+  function dateKey(d) {
+    const dd = d || new Date();
+    return dd.getFullYear() + '-' +
+      String(dd.getMonth() + 1).padStart(2, '0') + '-' +
+      String(dd.getDate()).padStart(2, '0');
+  }
+  function todayKey() { return dateKey(); }
+  function dateLabel(key) {
+    const t = todayKey();
+    const yest = new Date(); yest.setDate(yest.getDate() - 1);
+    if (key === t) return 'oggi';
+    if (key === dateKey(yest)) return 'ieri';
+    return new Date(key + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+  }
+
+  // ── STATE ──
+  let log     = JSON.parse(localStorage.getItem('callog')     || '{}');
+  let goal    = parseInt(localStorage.getItem('calgoal')      || '1900');
+  let catalog = JSON.parse(localStorage.getItem('calcatalog') || '[]');
+  let active  = todayKey();
+  let editCatIdx = null;
+
+  // Migrate old data: drop any key that is in the future
+  const today = todayKey();
+  Object.keys(log).filter(k => k > today).forEach(k => delete log[k]);
+  saveLog();
+
+  // Preload catalog if empty
+  if (catalog.length === 0) {
+    catalog = [
+      { name: 'Insalata (200g)',    kcal: 30,  p: 2,  c: 4,  g: 0  },
+      { name: 'Olive verdi (150g)', kcal: 210, p: 2,  c: 3,  g: 22 },
+      { name: 'Mozzarella (100g)', kcal: 250, p: 18, c: 2,  g: 19 },
+      { name: 'Pollo (400g)',       kcal: 440, p: 84, c: 0,  g: 10 },
+      { name: 'Olio (20ml)',        kcal: 180, p: 0,  c: 0,  g: 20 },
+    ];
+    saveCatalog();
+  }
+
+  function saveLog()     { localStorage.setItem('callog',     JSON.stringify(log)); }
+  function saveCatalog() { localStorage.setItem('calcatalog', JSON.stringify(catalog)); }
+
+  function getEntries() { return log[active] || []; }
+  function getTotals() {
+    return getEntries().reduce((a, e) => ({
+      kcal: a.kcal + (e.kcal||0), p: a.p + (e.p||0),
+      c: a.c + (e.c||0), g: a.g + (e.g||0)
+    }), { kcal:0, p:0, c:0, g:0 });
+  }
+  function pct(v, max) { return Math.min(v / max * 100, 100); }
+
+  // ── TAB KEYS: always show last 14 days ──
+  function getTabKeys() {
+    const keys = new Set(Object.keys(log));
+    for (let i = 0; i < 14; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      keys.add(dateKey(d));
+    }
+    return [...keys].filter(k => k <= todayKey()).sort().reverse().slice(0, 14);
+  }
+
+  // ── RENDER ──
+  function renderTabs() {
+    const wrap = document.getElementById('dateTabs');
+    wrap.innerHTML = '';
+    getTabKeys().forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'date-tab' + (k === active ? ' active' : '');
+      btn.textContent = dateLabel(k);
+      btn.onclick = () => { active = k; render(); };
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderGoals(t) {
+    const rows = [
+      { key: 'kcal', val: t.kcal, max: goal,    unit: 'kcal' },
+      { key: 'p',    val: t.p,    max: GOALS.p,  unit: 'g' },
+      { key: 'c',    val: t.c,    max: GOALS.c,  unit: 'g' },
+      { key: 'g',    val: t.g,    max: GOALS.g,  unit: 'g' },
+    ];
+    rows.forEach(({ key, val, max, unit }) => {
+      const p = pct(val, max);
+      const rem = max - val;
+      document.getElementById(`gc-${key}-val`).textContent =
+        `${Math.round(val)} / ${max}${key==='kcal'?'':unit}`;
+      document.getElementById(`gc-${key}-rem`).textContent =
+        rem >= 0 ? `${Math.round(rem)}${unit} rimanenti` : `+${Math.round(-rem)}${unit} over`;
+      const bar = document.getElementById(`gc-${key}-bar`);
+      bar.style.width = p + '%';
+      bar.classList.toggle('over', val > max);
+    });
+  }
+
+  function renderEntries() {
+    const wrap  = document.getElementById('entries');
+    const empty = document.getElementById('emptyMsg');
+    wrap.querySelectorAll('.entry').forEach(el => el.remove());
+    const entries = getEntries();
+    empty.style.display = entries.length ? 'none' : '';
+    entries.forEach((e, i) => {
+      const kP = pct(e.kcal, goal);
+      const pP = pct(e.p, GOALS.p);
+      const cP = pct(e.c, GOALS.c);
+      const gP = pct(e.g, GOALS.g);
+      const div = document.createElement('div');
+      div.className = 'entry';
+      div.innerHTML = `
+        <div class="entry-row">
+          <div class="entry-left">
+            <div class="entry-name">${e.name}</div>
+            <div class="entry-bars">
+              <div class="entry-bar-row">
+                <span class="entry-bar-label" style="color:var(--accent)">kcal</span>
+                <div class="entry-bar-track"><div class="entry-bar-fill bar-kcal ${e.kcal>goal?'over':''}" style="width:${kP}%"></div></div>
+                <span class="entry-bar-pct">${Math.round(kP)}%</span>
+              </div>
+              <div class="entry-bar-row">
+                <span class="entry-bar-label" style="color:var(--p)">P</span>
+                <div class="entry-bar-track"><div class="entry-bar-fill bar-p ${e.p>GOALS.p?'over':''}" style="width:${pP}%"></div></div>
+                <span class="entry-bar-pct">${Math.round(pP)}%</span>
+              </div>
+              <div class="entry-bar-row">
+                <span class="entry-bar-label" style="color:var(--c)">C</span>
+                <div class="entry-bar-track"><div class="entry-bar-fill bar-c ${e.c>GOALS.c?'over':''}" style="width:${cP}%"></div></div>
+                <span class="entry-bar-pct">${Math.round(cP)}%</span>
+              </div>
+              <div class="entry-bar-row">
+                <span class="entry-bar-label" style="color:var(--g)">G</span>
+                <div class="entry-bar-track"><div class="entry-bar-fill bar-g ${e.g>GOALS.g?'over':''}" style="width:${gP}%"></div></div>
+                <span class="entry-bar-pct">${Math.round(gP)}%</span>
+              </div>
+            </div>
+          </div>
+          <div class="entry-right">
+            <div class="entry-kcal">${e.kcal} kcal</div>
+            <div class="entry-macros">
+              <span class="p">P${e.p}g</span> · <span class="c">C${e.c}g</span> · <span class="g">G${e.g}g</span>
+            </div>
+            <div class="entry-actions">
+              <button class="edit-btn" onclick="toggleEdit(${i})">✎</button>
+              <button class="del-btn"  onclick="delEntry(${i})">✕</button>
+            </div>
+          </div>
+        </div>
+        <div class="entry-edit-form" id="ef-${i}">
+          <input type="text"   id="en-${i}" value="${e.name}" />
+          <div class="edit-macro-row">
+            <input type="number" id="ek-${i}" value="${e.kcal}" placeholder="kcal" style="border-color:var(--accent)" />
+            <input type="number" id="ep-${i}" value="${e.p}"    placeholder="P"    style="border-color:var(--p)" />
+            <input type="number" id="ec-${i}" value="${e.c}"    placeholder="C"    style="border-color:var(--c)" />
+            <input type="number" id="eg-${i}" value="${e.g}"    placeholder="G"    style="border-color:var(--g)" />
+          </div>
+          <div class="edit-actions">
+            <button class="btn-primary"   onclick="saveEdit(${i})">salva</button>
+            <button class="btn-secondary" onclick="toggleEdit(${i})">annulla</button>
+          </div>
+        </div>`;
+      wrap.insertBefore(div, empty);
+    });
+  }
+
+  function render() {
+    renderTabs();
+    const t = getTotals();
+    document.getElementById('totalKcal').textContent = Math.round(t.kcal);
+    document.getElementById('totalP').textContent    = Math.round(t.p) + 'g';
+    document.getElementById('totalC').textContent    = Math.round(t.c) + 'g';
+    document.getElementById('totalG').textContent    = Math.round(t.g) + 'g';
+    const kp = pct(t.kcal, goal);
+    const gb = document.getElementById('goalBar');
+    gb.style.width = kp + '%'; gb.classList.toggle('over', t.kcal > goal);
+    document.getElementById('goalLabel').textContent = `TDEE: ${goal} kcal`;
+    document.getElementById('goalInput').value = goal;
+    renderGoals(t);
+    renderEntries();
+  }
+
+  // ── CATALOG ──
+  function renderCatalog() {
+    const wrap = document.getElementById('catalogChips');
+    wrap.innerHTML = '';
+    if (!catalog.length) {
+      wrap.innerHTML = '<span style="font-size:11px;color:var(--muted)">nessun alimento salvato</span>';
+      return;
+    }
+    catalog.forEach((item, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.title = `P${item.p}g · C${item.c}g · G${item.g}g`;
+      chip.innerHTML = `
+        <span onclick="logFromCatalog(${i})">${item.name} <span class="chip-kcal">${item.kcal}</span></span>
+        <button class="chip-edit-btn" onclick="openEditCat(${i})">✎</button>
+        <button class="chip-del-btn"  onclick="delCatItem(${i})">✕</button>`;
+      wrap.appendChild(chip);
+    });
+  }
+
+  function logFromCatalog(i) {
+    if (!log[active]) log[active] = [];
+    log[active].push({ ...catalog[i] });
+    saveLog(); render();
+  }
+  function openNewCat() {
+    editCatIdx = null;
+    ['catName','catKcal','catP','catC','catG'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('catPanel').classList.add('open');
+    document.getElementById('btnNewCat').style.display = 'none';
+    document.getElementById('catName').focus();
+  }
+  function openEditCat(i) {
+    editCatIdx = i;
+    const it = catalog[i];
+    document.getElementById('catName').value = it.name;
+    document.getElementById('catKcal').value = it.kcal;
+    document.getElementById('catP').value    = it.p;
+    document.getElementById('catC').value    = it.c;
+    document.getElementById('catG').value    = it.g;
+    document.getElementById('catPanel').classList.add('open');
+    document.getElementById('btnNewCat').style.display = 'none';
+    document.getElementById('catName').focus();
+  }
+  function closeCatPanel() {
+    document.getElementById('catPanel').classList.remove('open');
+    document.getElementById('btnNewCat').style.display = '';
+    editCatIdx = null;
+  }
+  function saveCatItem() {
+    const name = document.getElementById('catName').value.trim();
+    const kcal = parseFloat(document.getElementById('catKcal').value) || 0;
+    const p    = parseFloat(document.getElementById('catP').value)    || 0;
+    const c    = parseFloat(document.getElementById('catC').value)    || 0;
+    const g    = parseFloat(document.getElementById('catG').value)    || 0;
+    if (!name || !kcal) return;
+    const item = { name, kcal, p, c, g };
+    if (editCatIdx !== null) catalog[editCatIdx] = item; else catalog.push(item);
+    saveCatalog(); closeCatPanel(); renderCatalog();
+  }
+  function delCatItem(i) { catalog.splice(i, 1); saveCatalog(); renderCatalog(); }
+
+  // ── ENTRIES ──
+  function addEntry() {
+    const name = document.getElementById('foodName').value.trim();
+    const kcal = parseFloat(document.getElementById('foodKcal').value) || 0;
+    const p    = parseFloat(document.getElementById('foodP').value)    || 0;
+    const c    = parseFloat(document.getElementById('foodC').value)    || 0;
+    const g    = parseFloat(document.getElementById('foodG').value)    || 0;
+    if (!name || !kcal) return;
+    if (!log[active]) log[active] = [];
+    log[active].push({ name, kcal, p, c, g });
+    saveLog();
+    ['foodName','foodKcal','foodP','foodC','foodG'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('foodName').focus();
+    render();
+  }
+  function toggleEdit(i) {
+    const f = document.getElementById(`ef-${i}`);
+    f.classList.toggle('open');
+    if (f.classList.contains('open')) document.getElementById(`en-${i}`).focus();
+  }
+  function saveEdit(i) {
+    const name = document.getElementById(`en-${i}`).value.trim();
+    const kcal = parseFloat(document.getElementById(`ek-${i}`).value) || 0;
+    const p    = parseFloat(document.getElementById(`ep-${i}`).value) || 0;
+    const c    = parseFloat(document.getElementById(`ec-${i}`).value) || 0;
+    const g    = parseFloat(document.getElementById(`eg-${i}`).value) || 0;
+    if (!name) return;
+    log[active][i] = { name, kcal, p, c, g };
+    saveLog(); render();
+  }
+  function delEntry(i) { log[active].splice(i, 1); saveLog(); render(); }
+
+  function toggleAddForm() {
+    const f = document.getElementById('addForm');
+    const open = f.style.display === 'none';
+    f.style.display = open ? '' : 'none';
+    document.getElementById('btnAddFood').textContent = open ? '− chiudi' : '+ aggiungi alimento';
+    if (open) document.getElementById('foodName').focus();
+  }
+  function updateGoal() {
+    goal = parseInt(document.getElementById('goalInput').value) || 1900;
+    localStorage.setItem('calgoal', goal);
+    render();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (document.getElementById('addForm').style.display !== 'none') addEntry();
+    if (document.getElementById('catPanel').classList.contains('open')) saveCatItem();
+  });
+
+  function exportData() {
+    const payload = {
+      log: log,
+      catalog: catalog,
+      goal: goal
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'calorie-log-' + todayKey() + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const payload = JSON.parse(e.target.result);
+        if (payload.log)     { log     = payload.log;     saveLog(); }
+        if (payload.catalog) { catalog = payload.catalog; saveCatalog(); }
+        if (payload.goal)    { goal    = payload.goal;    localStorage.setItem('calgoal', goal); }
+        renderCatalog();
+        render();
+      } catch(err) {
+        alert('File non valido.');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  renderCatalog();
+  render();
+</script>
+</body>
+</html>
