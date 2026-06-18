@@ -155,8 +155,8 @@
   .comp-bars { display: flex; height: 5px; border-radius: 3px; overflow: hidden; gap: 1px; margin-bottom: 4px; }
   .comp-seg { height: 100%; border-radius: 1px; transition: width 0.4s ease; }
   .entry-kcal-small { font-size: 10px; color: var(--accent); }
-  .entry-right { position: relative; flex: 35; background: #141414; border: 1px solid var(--border); border-radius: 8px; padding: 18px 10px 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
-  .entry-macros { font-size: 13px; color: var(--muted); white-space: nowrap; display: flex; gap: 9px; }
+  .entry-right { position: relative; flex: 35; background: #141414; border: 1px solid var(--border); border-radius: 8px; padding: 18px 10px 9px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 5px; }
+  .entry-macros { font-size: 10px; color: var(--muted); white-space: nowrap; display: flex; gap: 7px; }
   .entry-macros .ec { color: var(--c); } .entry-macros .ep { color: var(--p); } .entry-macros .eg { color: var(--g); }
   .entry-actions { display: flex; align-items: center; gap: 8px; }
   .qty-btn { background: var(--border); border: none; color: var(--text); font-family: inherit; font-size: 17px; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; line-height: 1; }
@@ -652,34 +652,53 @@
     </div>`;
   }
 
+  let lastEntryGroups = [];
+
   function renderEntries() {
     const wrap=document.getElementById('entries');
     const empty=document.getElementById('emptyMsg');
     wrap.querySelectorAll('.entry').forEach(el=>el.remove());
     const entries=getEntries();
     empty.style.display=entries.length?'none':'';
+
+    const groups=[];
     entries.forEach((e,i)=>{
-      const grams = e.grams||0;
-      const tK=Math.round((e.kcal||0)*grams), tC=Math.round((e.c||0)*grams), tP=Math.round((e.p||0)*grams), tG=Math.round((e.g||0)*grams);
+      let grp=groups.find(g=>g.name===e.name);
+      if (!grp) { grp={name:e.name, indices:[]}; groups.push(grp); }
+      grp.indices.push(i);
+    });
+    lastEntryGroups = groups;
+
+    groups.forEach((grp,gi)=>{
+      const items = grp.indices.map(idx=>entries[idx]);
+      const totals = items.reduce((a,e)=>{
+        const grams=e.grams||0;
+        return { grams:a.grams+grams, kcal:a.kcal+(e.kcal||0)*grams, c:a.c+(e.c||0)*grams, p:a.p+(e.p||0)*grams, g:a.g+(e.g||0)*grams };
+      },{grams:0,kcal:0,c:0,p:0,g:0});
+      const tGrams=Math.round(totals.grams), tK=Math.round(totals.kcal), tC=Math.round(totals.c), tP=Math.round(totals.p), tG=Math.round(totals.g);
+      const unit = items[0].unit||'g';
+      const repeatCount = items.length;
+      const lastIdx = grp.indices[grp.indices.length-1];
       const div=document.createElement('div');
       div.className='entry';
       div.innerHTML=`
         <div class="entry-left">
           <div class="entry-name-row">
-            ${e.name}
-            <span class="entry-grams">${grams}${e.unit||'g'}</span>
+            ${grp.name}
+            ${repeatCount>1?`<span class="entry-qty">×${repeatCount}</span>`:''}
+            <span class="entry-grams">${tGrams}${unit}</span>
           </div>
           ${compBars(tC,tP,tG)}
           <div class="entry-kcal-small">${tK} kcal</div>
         </div>
         <div class="entry-right">
-          <button class="del-x-btn" onclick="askDeleteEntry(${i})">✕</button>
+          <button class="del-x-btn" onclick="askDeleteGroup(${gi})">✕</button>
           <div class="entry-macros">
             <span class="ec">C${tC}</span><span class="ep">P${tP}</span><span class="eg">G${tG}</span>
           </div>
           <div class="entry-actions">
-            <button class="qty-btn" onclick="changeGrams(${i},-10)">−</button>
-            <button class="qty-btn" onclick="changeGrams(${i},10)">+</button>
+            <button class="qty-btn" onclick="removeEntryInstance(${lastIdx})">−</button>
+            <button class="qty-btn" onclick="duplicateEntry(${lastIdx})">+</button>
           </div>
         </div>`;
       wrap.insertBefore(div,empty);
@@ -693,16 +712,27 @@
     renderEntries();
   }
 
-  // ══ ENTRY GRAMS ADJUST / DELETE ══
-  function changeGrams(i,delta) {
+  // ══ ENTRY REPEAT (+/-) / DELETE ══
+  function duplicateEntry(i) {
     const entries=log[active];
-    if (!entries) return;
-    entries[i].grams = Math.max(0, (entries[i].grams||0)+delta);
+    if (!entries||!entries[i]) return;
+    entries.push({...entries[i]});
     saveLog(); render();
   }
-  function askDeleteEntry(i) {
-    pendingDelete = {type:'entry', index:i};
-    document.getElementById('confirmSub').textContent = `"${log[active][i].name}" verrà rimosso dal log di oggi`;
+  function removeEntryInstance(i) {
+    const entries=log[active];
+    if (!entries||!entries[i]) return;
+    entries.splice(i,1);
+    saveLog(); render();
+  }
+  function askDeleteGroup(gi) {
+    const grp = lastEntryGroups[gi];
+    if (!grp) return;
+    const count = grp.indices.length;
+    pendingDelete = {type:'group', name:grp.name};
+    document.getElementById('confirmSub').textContent = count>1
+      ? `tutte le ${count} occorrenze di "${grp.name}" verranno rimosse dal log di oggi`
+      : `"${grp.name}" verrà rimosso dal log di oggi`;
     document.getElementById('confirmOverlay').classList.add('open');
   }
   function askDeleteCat(i) {
@@ -713,8 +743,8 @@
   function closeConfirm() { pendingDelete=null; document.getElementById('confirmOverlay').classList.remove('open'); }
   function confirmDelete() {
     if (!pendingDelete) return;
-    if (pendingDelete.type==='entry') {
-      log[active].splice(pendingDelete.index,1);
+    if (pendingDelete.type==='group') {
+      log[active] = log[active].filter(e=>e.name!==pendingDelete.name);
       saveLog(); render();
     } else if (pendingDelete.type==='cat') {
       catalog.splice(pendingDelete.index,1);
