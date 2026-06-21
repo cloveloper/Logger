@@ -197,6 +197,8 @@
   .entry-actions-box { display: flex; gap: 4px; border: 1px solid var(--border); border-radius: 8px; padding: 4px; background: var(--bg); }
   .entry-repeat-badge { position:absolute; top:-8px; right:-8px; background:var(--accent); color:#2a2a2a; font-size:9px; font-weight:700; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; line-height:1; }
   html[data-theme="light"] .entry-repeat-badge { color:#ffffff; }
+  .incomplete-badge { position:absolute; top:-8px; left:-8px; background:var(--danger); color:var(--bg); font-size:9px; font-weight:700; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; line-height:1; }
+  .food-incomplete-badge { position:absolute; top:-8px; left:-8px; display:flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:var(--danger); color:#fff; font-size:9px; font-weight:700; }
   .qty-btn { background: var(--border); border: none; color: var(--text); font-family: inherit; font-size: 17px; flex: 1; height: 28px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; line-height: 1; }
   .qty-btn:hover { background: #333; }
   .del-x-btn { position: absolute; top: 0; right: 0; width: 26px; height: 26px; background: var(--border); border: none; border-left: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0 8px 0 8px; color: var(--muted); font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s, background 0.15s; }
@@ -230,7 +232,7 @@
   .freq-block .food-item { border: none; border-bottom: 1px solid var(--border); border-radius: 0; margin-bottom: 0; }
   .freq-block .food-item:last-child { border-bottom: none; }
 
-  .food-item { background: transparent; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; padding: 11px 14px; display: flex; align-items: center; gap: 12px; transition: border-color 0.15s; }
+  .food-item { background: transparent; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; padding: 11px 14px; display: flex; align-items: center; gap: 12px; transition: border-color 0.15s; position: relative; overflow: visible; }
   .food-item:hover { border-color: #333; }
   .food-item-info { flex: 1; min-width: 0; }
   .food-item-name { font-size: 13px; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
@@ -282,7 +284,7 @@
   /* CONFIRM DELETE MODAL */
   .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
   .confirm-overlay.open { display: flex; }
-  .confirm-box { background: #111; border: 1px solid var(--border); border-radius: 12px; padding: 22px 20px; max-width: 320px; width: 100%; text-align: center; }
+  .confirm-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 20px; max-width: 320px; width: 100%; text-align: center; }
   .confirm-title { font-size: 13px; margin-bottom: 6px; }
   .confirm-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
   .confirm-row { display: flex; gap: 8px; }
@@ -385,52 +387,58 @@
 <div class="page" id="page-search">
   <div class="search-bar-row">
     <input class="search-input" id="searchInput" placeholder="cerca per nome…" oninput="renderFoodList()"/>
-    <button class="search-add-btn" onclick="toggleCatPanel()" title="aggiungi al catalogo">+</button>
-  </div>
-  <div class="cat-panel" id="catPanel">
-    <div style="display:flex;justify-content:flex-end">
-      <button id="catUnitG" onclick="setCatUnit('g')" style="background:var(--accent);color:#0f0f0f;border:1px solid var(--accent);border-radius:6px 0 0 6px;font-family:inherit;font-size:11px;padding:5px 14px;cursor:pointer;transition:all 0.15s">grammi</button>
-      <button id="catUnitMl" onclick="setCatUnit('ml')" style="background:none;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;font-family:inherit;font-size:11px;color:var(--muted);padding:5px 14px;cursor:pointer;transition:all 0.15s">millilitri</button>
-    </div>
-    <input type="text" id="catName" placeholder="nome alimento" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-    <div style="display:flex;flex-direction:column;gap:6px">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span class="cat-panel-hint" style="font-size:11px">kcal</span>
-        <div style="display:flex;align-items:center;gap:6px">
-          <input type="number" id="catKcal" placeholder="0" min="0" style="width:100px;text-align:left"/>
-          <span class="cat-panel-hint">/100g</span>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span class="cat-panel-hint" style="font-size:11px">carb</span>
-        <div style="display:flex;align-items:center;gap:6px">
-          <input type="number" id="catC" placeholder="0" min="0" style="width:100px;text-align:left"/>
-          <span class="cat-panel-hint">/100g</span>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span class="cat-panel-hint" style="font-size:11px">prot</span>
-        <div style="display:flex;align-items:center;gap:6px">
-          <input type="number" id="catP" placeholder="0" min="0" style="width:100px;text-align:left"/>
-          <span class="cat-panel-hint">/100g</span>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span class="cat-panel-hint" style="font-size:11px">grassi</span>
-        <div style="display:flex;align-items:center;gap:6px">
-          <input type="number" id="catG" placeholder="0" min="0" style="width:100px;text-align:left"/>
-          <span class="cat-panel-hint">/100g</span>
-        </div>
-      </div>
-    </div>
-    <input type="number" id="catDefaultG" placeholder="grammatura predefinita (es. 80)" min="0"/>
-    <div class="cat-panel-row">
-      <button class="btn-primary" id="catSaveBtn" onclick="saveCatItem()">salva</button>
-      <button class="btn-secondary" id="catDeleteBtn" style="display:none;border-color:var(--danger);color:var(--danger)" onclick="deleteCatFromPanel()">elimina</button>
-      <button class="btn-secondary" onclick="closeCatPanel()">annulla</button>
-    </div>
+    <button class="search-add-btn" onclick="openCatAddPanel()" title="aggiungi al catalogo">+</button>
   </div>
   <div class="food-list" id="foodList"></div>
+</div>
+
+<!-- CAT EDIT OVERLAY -->
+<div class="add-overlay" id="catOverlay" onclick="closeCatOverlay(event)">
+  <div class="add-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="add-sheet-title" id="catOverlayTitle">nuovo alimento</div>
+      <div style="display:flex;justify-content:flex-end">
+        <button id="catUnitG" onclick="setCatUnit('g')" style="background:var(--accent);color:#0f0f0f;border:1px solid var(--accent);border-radius:6px 0 0 6px;font-family:inherit;font-size:11px;padding:4px 12px;cursor:pointer;transition:all 0.15s">grammi</button>
+        <button id="catUnitMl" onclick="setCatUnit('ml')" style="background:none;border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;font-family:inherit;font-size:11px;color:var(--muted);padding:4px 12px;cursor:pointer;transition:all 0.15s">millilitri</button>
+      </div>
+    </div>
+    <input type="text" id="catName" placeholder="nome alimento" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:15px;font-weight:700;padding:10px 12px;width:100%;outline:none"/>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;color:var(--accent)">kcal</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" id="catKcal" placeholder="0" min="0" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" style="width:100px;text-align:left;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:inherit;font-size:13px;padding:6px 8px;outline:none"/>
+          <span class="cat-panel-hint">/100g</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;color:var(--c)">Carboidrati</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" id="catC" placeholder="0" min="0" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" style="width:100px;text-align:left;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:inherit;font-size:13px;padding:6px 8px;outline:none"/>
+          <span class="cat-panel-hint">/100g</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;color:var(--p)">Proteine</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" id="catP" placeholder="0" min="0" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" style="width:100px;text-align:left;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:inherit;font-size:13px;padding:6px 8px;outline:none"/>
+          <span class="cat-panel-hint">/100g</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;color:var(--g)">Grassi</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" id="catG" placeholder="0" min="0" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" style="width:100px;text-align:left;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:inherit;font-size:13px;padding:6px 8px;outline:none"/>
+          <span class="cat-panel-hint">/100g</span>
+        </div>
+      </div>
+      <input type="number" id="catDefaultG" placeholder="grammatura predefinita (es. 80)" min="0" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:inherit;font-size:13px;padding:8px 10px;width:100%;outline:none"/>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" id="catSaveBtn" onclick="saveCatItem()" style="flex:1">salva</button>
+      <button class="btn-secondary" id="catDeleteBtn" style="display:none;border-color:var(--danger);color:var(--danger);flex:1" onclick="deleteCatFromPanel()">elimina</button>
+    </div>
+  </div>
 </div>
 
 <!-- REPORT -->
@@ -465,7 +473,7 @@
 <div class="page" id="page-profile">
   <div style="display:flex;justify-content:center;padding:36px 0 20px">
     <div style="font-family:'Poppins',sans-serif;font-size:22px;font-weight:600;color:var(--text);width:fit-content">
-      Ciao, <input class="pf-input" id="pf-nome" type="text" placeholder="come ti chiami?" oninput="saveProfile();this.style.width=(this.value.length||16)+'ch'" style="font-family:'Poppins',sans-serif;font-size:22px;font-weight:600;color:var(--accent);width:16ch;display:inline;text-align:left"/>
+      Ciao, <input class="pf-input" id="pf-nome" type="text" placeholder="come ti chiami?" oninput="saveProfile();this.style.width=(this.value.length||this.placeholder.length)+'ch'" style="font-family:'Poppins',sans-serif;font-size:22px;font-weight:600;color:var(--accent);width:15ch;display:inline;text-align:left;padding:0"/>
     </div>
   </div>
 
@@ -556,7 +564,7 @@
     </div>
   </div>
   <div class="footer" style="margin-top:8px">
-    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.7</div>
+    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.8</div>
     <a href="https://github.com/cloveloper" target="_blank">made with ♡ by clovis</a>
   </div>
 </div>
@@ -858,6 +866,7 @@
         div.className='entry';
         div.innerHTML=`
           <div class="entry-left" style="position:relative;cursor:pointer" onclick="openFoodInfo('${grp.name}',${items[0].grams||0},'${unit}',${items[0].kcal},${items[0].c},${items[0].p},${items[0].g},[${grp.indices}])">
+            ${(()=>{ const catItem=catalog.find(it=>it.name===grp.name); return catItem&&isIncomplete(catItem)?'<span class="incomplete-badge">!</span>':''; })()}
             <div class="entry-name-row" style="justify-content:space-between">
               <div style="display:flex;align-items:center;gap:7px">
                 ${grp.name}
@@ -868,7 +877,7 @@
             ${compBars(tC,tP,tG)}
           </div>
           <div class="entry-right" style="position:relative">
-            ${repeatCount>1?`<span class="entry-repeat-badge">${repeatCount}</span>`:''}
+            ${repeatCount>1?'<span class="entry-repeat-badge">'+repeatCount+'</span>':''}
             <div class="entry-actions">
               <button class="qty-btn" onclick="removeEntryInstance(${lastIdx})">−</button>
               <button class="qty-btn" onclick="duplicateEntry(${lastIdx})">+</button>
@@ -890,7 +899,18 @@
   function duplicateEntry(i) {
     const entries=log[active];
     if (!entries||!entries[i]) return;
-    entries.push({...entries[i]});
+    const entry = entries[i];
+    const catItem = catalog.find(it=>it.name===entry.name);
+    if (catItem) {
+      // update all existing entries with this name to fresh catalog values
+      entries.forEach(e => {
+        if (e.name===entry.name) {
+          e.kcal=catItem.kcal; e.c=catItem.c; e.p=catItem.p; e.g=catItem.g;
+        }
+      });
+    }
+    const fresh = catItem ? {...entry, kcal:catItem.kcal, c:catItem.c, p:catItem.p, g:catItem.g, unit:catItem.unit||entry.unit} : {...entry};
+    entries.push(fresh);
     saveLog(); render();
   }
   function removeEntryInstance(i) {
@@ -928,24 +948,20 @@
   }
 
   // ══ CATALOG / SEARCH ══
-  function toggleCatPanel() {
-    if (catPanelOpen) { closeCatPanel(); return; }
-    openCatAddPanel();
-  }
+  function toggleCatPanel() { openCatAddPanel(); }
   function openCatAddPanel() {
     catEditIndex = null;
     catPanelOpen = true;
-    document.getElementById('catPanel').classList.add('open');
     ['catName','catKcal','catC','catP','catG','catDefaultG'].forEach(id=>document.getElementById(id).value='');
     setCatUnit('g');
     updateCatPanelMode();
-    document.getElementById('catName').focus();
+    document.getElementById('catOverlay').classList.add('open');
+    setTimeout(()=>document.getElementById('catName').focus(), 100);
   }
   function openCatEditPanel(idx) {
     const item = catalog[idx];
     catEditIndex = idx;
     catPanelOpen = true;
-    document.getElementById('catPanel').classList.add('open');
     document.getElementById('catName').value = item.name;
     document.getElementById('catKcal').value = round2(item.kcal*100);
     document.getElementById('catC').value = round2(item.c*100);
@@ -954,7 +970,8 @@
     document.getElementById('catDefaultG').value = item.defaultG || '';
     setCatUnit(item.unit || 'g');
     updateCatPanelMode();
-    document.getElementById('catName').focus();
+    document.getElementById('catOverlay').classList.add('open');
+    setTimeout(()=>document.getElementById('catName').focus(), 100);
   }
   function setCatUnit(u) {
     catUnit = u;
@@ -971,7 +988,7 @@
   function round2(n) { return Math.round(n*100)/100; }
   function updateCatPanelMode() {
     const editing = catEditIndex !== null;
-    document.getElementById('catSaveBtn').textContent = editing ? 'salva modifiche' : 'salva';
+    document.getElementById('catSaveBtn').textContent = 'salva';
     document.getElementById('catDeleteBtn').style.display = editing ? '' : 'none';
   }
   function deleteCatFromPanel() {
@@ -979,7 +996,8 @@
     askDeleteCat(catEditIndex);
     closeCatPanel();
   }
-  function closeCatPanel() { catPanelOpen=false; catEditIndex=null; document.getElementById('catPanel').classList.remove('open'); }
+  function closeCatOverlay(e) { if (e.target===document.getElementById('catOverlay')) closeCatPanel(); }
+  function closeCatPanel() { catPanelOpen=false; catEditIndex=null; document.getElementById('catOverlay').classList.remove('open'); }
   function saveCatItem() {
     const name=document.getElementById('catName').value.trim();
     const kcal100=parseFloat(document.getElementById('catKcal').value)||0;
@@ -987,42 +1005,34 @@
     const p100=parseFloat(document.getElementById('catP').value)||0;
     const g100=parseFloat(document.getElementById('catG').value)||0;
     const defaultG=parseFloat(document.getElementById('catDefaultG').value)||100;
-    if (!name||!kcal100||!document.getElementById('catC').value||!document.getElementById('catP').value||!document.getElementById('catG').value) {
-      // check duplicate first, even if other fields are empty
-      if (name) {
-        const dup=catalog.findIndex((it,i)=>it.name.toLowerCase()===name.toLowerCase()&&i!==catEditIndex);
-        if (dup!==-1) {
-          const inp=document.getElementById('catName');
-          inp.style.borderColor='var(--danger)'; inp.value=''; inp.placeholder='nome già esistente';
-          setTimeout(()=>{ inp.style.borderColor=''; inp.placeholder='nome alimento'; },2000);
-          return;
-        }
-      }
-      const flash=(id,msg)=>{
-        const el=document.getElementById(id);
-        el.style.borderColor='var(--danger)';
-        const prev=el.placeholder; el.value=''; el.placeholder=msg;
-        setTimeout(()=>{ el.style.borderColor=''; el.placeholder=prev; },2000);
-      };
-      if (!name) flash('catName','campo obbligatorio');
-      if (!kcal100) flash('catKcal','obbligatorio');
-      if (!document.getElementById('catC').value) flash('catC','obbligatorio');
-      if (!document.getElementById('catP').value) flash('catP','obbligatorio');
-      if (!document.getElementById('catG').value) flash('catG','obbligatorio');
+    if (!name) {
+      const inp=document.getElementById('catName');
+      inp.style.borderColor='var(--danger)'; inp.value=''; inp.placeholder='campo obbligatorio';
+      setTimeout(()=>{ inp.style.borderColor=''; inp.placeholder='nome alimento'; },2000);
       return;
     }
     const duplicate = catalog.findIndex((it,i)=>it.name.toLowerCase()===name.toLowerCase() && i!==catEditIndex);
     if (duplicate!==-1) {
       const inp=document.getElementById('catName');
-      inp.style.borderColor='var(--danger)';
-      inp.placeholder='nome già esistente';
-      inp.value='';
+      inp.style.borderColor='var(--danger)'; inp.value=''; inp.placeholder='nome già esistente';
       setTimeout(()=>{ inp.style.borderColor=''; inp.placeholder='nome alimento'; },2000);
       return;
     }
     const newItem = { name, defaultG, unit: catUnit, kcal:kcal100/100, c:c100/100, p:p100/100, g:g100/100 };
     if (catEditIndex!==null) {
       catalog[catEditIndex] = newItem;
+      // sync all log entries with this name to the new nutritional values
+      Object.keys(log).forEach(day => {
+        log[day].forEach(entry => {
+          if (entry.name === name) {
+            entry.kcal = newItem.kcal;
+            entry.c = newItem.c;
+            entry.p = newItem.p;
+            entry.g = newItem.g;
+          }
+        });
+      });
+      saveLog();
     } else {
       catalog.push(newItem);
     }
@@ -1030,6 +1040,8 @@
   }
 
   let freqExpanded = false;
+
+  function isIncomplete(item) { return !item.kcal && !item.c && !item.p && !item.g; }
 
   function renderFoodList() {
     const query=document.getElementById('searchInput').value.trim().toLowerCase();
@@ -1041,7 +1053,7 @@
 
     const allSuggested=items.filter(it=>it.score>0).sort((a,b)=>b.score-a.score).slice(0,5);
     // always show all items in "tutti", freq status doesn't exclude them
-    const rest=items.sort((a,b)=>a.name.localeCompare(b.name));
+    const rest=items.sort((a,b)=>b.idx-a.idx);
 
     function makeItem(item, showBadge=false) {
       const div=document.createElement('div');
@@ -1049,7 +1061,8 @@
       const kcalPer100 = Math.round(item.kcal*100);
       const cPer100 = Math.round(item.c*100), pPer100 = Math.round(item.p*100), gPer100 = Math.round(item.g*100);
       div.innerHTML=`
-        <div class="food-item-info">
+        ${isIncomplete(item)?'<span class="food-incomplete-badge">!</span>':''}
+        <div class="food-item-info" style="cursor:pointer" onclick="openCatEditPanel(${item.idx})">
           <div class="food-item-name">
             ${item.name}
             ${showBadge&&item.score>0?`<span class="food-freq-badge">×${item.score}</span>`:''}
@@ -1191,6 +1204,15 @@
     _fiCtx = { kcalPg, cPg, pPg, gPg, unit, indices };
     const multi = indices && indices.length > 1;
     document.getElementById('fi-name').textContent = name;
+    document.getElementById('fi-name').style.cssText += ';cursor:pointer';
+    document.getElementById('fi-name').onclick = () => {
+      document.getElementById('foodInfoOverlay').classList.remove('open');
+      const idx = catalog.findIndex(it => it.name === name);
+      if (idx !== -1) {
+        switchPage('search');
+        setTimeout(() => openCatEditPanel(idx), 50);
+      }
+    };
     const gramsInput = document.getElementById('fi-grams');
     gramsInput.disabled = multi;
     gramsInput.style.opacity = multi ? '0.4' : '1';
@@ -1255,7 +1277,7 @@
     saveProfileLS();
   }
   function loadProfile() {
-    if (profile.nome) { const el=document.getElementById('pf-nome'); el.value=profile.nome; el.style.width=(profile.nome.length||16)+'ch'; }
+    if (profile.nome) { const el=document.getElementById('pf-nome'); el.value=profile.nome; el.style.width=(profile.nome.length||el.placeholder.length)+'ch'; }
     if (profile.peso) document.getElementById('pf-peso').value = profile.peso;
     if (profile.altezza) document.getElementById('pf-altezza').value = profile.altezza;
     if (profile.eta)  document.getElementById('pf-eta').value  = profile.eta;
