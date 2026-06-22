@@ -144,7 +144,7 @@
   /* BIG ADD BUTTON */
   .big-add-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
   .big-add-outer {
-    width: 20%; aspect-ratio: 1.30/1; border-radius: 16px;
+    width: 23%; aspect-ratio: 1.30/1; border-radius: 16px;
     padding: 2px;
     background: conic-gradient(var(--accent) 0% var(--kcal-pct, 0%), var(--border) var(--kcal-pct, 0%) 100%);
     transition: --kcal-pct 0.4s ease;
@@ -152,8 +152,9 @@
   .big-add-btn {
     width: 100%; height: 100%; border-radius: 14px;
     background: var(--bg); border: none;
-    color: var(--accent); font-size: 36px; font-weight: 530;
+    color: var(--accent); font-size: 42px; font-weight: 530;
     display: flex; align-items: center; justify-content: center;
+    line-height: 1; padding-bottom: 2px;
     cursor: pointer; transition: background 0.2s;
   }
   .big-add-btn:hover { background: var(--bg); }
@@ -606,7 +607,7 @@
     </div>
   </div>
   <div class="footer" style="margin-top:8px">
-    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.5</div>
+    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.9</div>
     <a href="https://github.com/cloveloper" target="_blank">made with ♡ by clovis</a>
   </div>
 </div>
@@ -886,7 +887,7 @@
     const minAW = 0.15;
     if (wRatio <= 0) {
       waterCard.style.background = `rgba(${waterRgb},${minAW})`;
-      waterCard.style.borderColor = `rgba(${waterBorderRgb},${isLightW ? 0.5 : 0.25})`;
+      waterCard.style.borderColor = `rgba(${waterBorderRgb},${isLightW ? 0.35 : 0.2})`;
       waterCard.classList.remove('complete');
     } else if (wRatio >= 1) {
       waterCard.style.background = '';
@@ -895,7 +896,7 @@
     } else {
       const a = Math.round((minAW + wRatio * 0.5) * 100) / 100;
       waterCard.style.background = `rgba(${waterRgb},${a})`;
-      waterCard.style.borderColor = `rgba(${waterBorderRgb},${Math.min(wRatio * (isLightW ? 1.2 : 1.2), 0.7)})`;
+      waterCard.style.borderColor = `rgba(${waterBorderRgb},${Math.min(wRatio * 0.8, 0.55)})`;
       waterCard.classList.remove('complete');
     }
     // update big-add kcal progress ring
@@ -987,11 +988,10 @@
           <div class="entry-left" style="position:relative;cursor:pointer" onclick="openFoodInfo('${grp.name}',${items[0].grams||0},'${unit}',${items[0].kcal},${items[0].c},${items[0].p},${items[0].g},[${grp.indices}])">
             ${(()=>{ const catItem=catalog.find(it=>it.name===grp.name); return catItem&&isIncomplete(catItem)?'<span class="incomplete-badge">!</span>':''; })()}
             <div class="entry-name-row" style="justify-content:space-between">
-              <div style="display:flex;align-items:center;gap:7px">
-                ${grp.name}
-                <span class="entry-grams">${tGrams}${unit}</span>
+              <div style="flex:1;min-width:0">
+                ${grp.name}<span class="entry-grams" style="margin-left:5px">${tGrams}${unit}</span>
               </div>
-              <span class="entry-kcal-small">${tK}<span style="font-size:8px;color:var(--muted)"> kcal</span></span>
+              <span class="entry-kcal-small" style="flex-shrink:0;margin-left:6px">${tK}<span style="font-size:8px;color:var(--muted)"> kcal</span></span>
             </div>
             ${compBars(tC,tP,tG)}
           </div>
@@ -1082,7 +1082,7 @@
     updateCatPanelMode();
     document.getElementById('catOverlay').classList.add('open');
     const query = document.getElementById('searchInput').value.trim();
-    if (query) { const el=document.getElementById('catName'); el.value=query; }
+    if (query) { const el=document.getElementById('catName'); el.value=query.charAt(0).toUpperCase()+query.slice(1); }
     setTimeout(()=>{ const el=document.getElementById('catName'); el.removeAttribute('readonly'); el.focus(); }, 100);
   }
   function openCatEditPanel(idx) {
@@ -1169,7 +1169,7 @@
   let freqExpanded = false;
   let activeCat = null; // null = show categories grid, string = show foods of that category
 
-  const FOOD_CATEGORIES = [{"id":"frequenti","label":"Frequenti","icon":"ti-flame","names":[],"special":"frequenti"},{"id":"miei","label":"Miei","icon":"ti-user","names":[],"special":"miei"},{"id":"bevande","label":"Bevande","icon":"ti-droplet","names":["Latte di soia","Latte di avena","Succo d'arancia","Caffè espresso","Proteina whey"]},{"id":"cereali","label":"Cereali","icon":"ti-bread","names":["Pasta (cotta)","Pane bianco","Pane integrale","Pane di segale","Grissini","Fiocchi d'avena","Crackers","Cornflakes","Farro (cotto)","Orzo (cotto)","Gnocchi","Piadina","Fette biscottate","Riso (cotto)","Pizza margherita"]},{"id":"dolci","label":"Dolci & Snack","icon":"ti-cake","names":["Babà al rum","Sfogliatella riccia","Sfogliatella frolla","Millefoglie","Torta caprese","Tiramisù","Cannolo siciliano","Pastiera napoletana","Panna cotta","Crostata di marmellata","Torta della nonna","Zeppole","Struffoli","Panettone","Colomba pasquale","Gelato alla crema","Gelato al cioccolato","Granita al limone","Biscotti secchi","Miele","Marmellata","Cioccolato fondente","Cioccolato al latte","Olio d'oliva","Noci","Mandorle","Arachidi","Burro di arachidi"]},{"id":"frutta","label":"Frutta","icon":"ti-apple","names":["Mela","Banana","Arancia","Kiwi","Fragole","Uva","Pera","Pesca","Anguria","Melone","Mango","Avocado"]},{"id":"latticini","label":"Latticini","icon":"ti-cheese","names":["Latte intero","Latte parzialmente scremato","Yogurt bianco intero","Yogurt greco","Mozzarella","Parmigiano Reggiano","Ricotta","Pecorino","Grana Padano","Burro","Fiordilatte"]},{"id":"legumi","label":"Legumi","icon":"ti-leaf","names":["Ceci (cotti)","Lenticchie (cotte)","Fagioli (cotti)","Piselli","Edamame","Tofu"]},{"id":"piatti","label":"Piatti pronti","icon":"ti-salad","names":["Spaghetti al pomodoro","Pasta al ragù","Pasta al forno","Spaghetti carbonara","Pasta all'amatriciana","Pasta cacio e pepe","Risotto ai funghi","Risotto alla milanese","Lasagna","Parmigiana di melanzane","Ciambotta napoletana","Caponata siciliana","Minestrone","Ribollita","Pollo alla cacciatora","Cotoletta alla milanese","Saltimbocca alla romana","Ossobuco","Polpette al sugo","Frittata di verdure","Supplì","Arancino","Focaccia","Calzone","Insalata caprese","Bruschetta al pomodoro","Pizza margherita"]},{"id":"proteine","label":"Proteine","icon":"ti-meat","names":["Petto di pollo","Coscia di pollo","Manzo (macinato)","Manzo (fesa)","Vitello","Maiale (lonza)","Salmone","Tonno al naturale","Tonno sott'olio","Merluzzo","Branzino","Orata","Gamberetti","Uovo intero","Albume d'uovo","Prosciutto crudo","Prosciutto cotto","Bresaola","Salame Milano","Mortadella","Speck"]},{"id":"verdure","label":"Verdure","icon":"ti-carrot","names":["Pomodoro","Insalata mista","Spinaci","Zucchine","Melanzane","Peperoni","Broccoli","Cavolfiore","Carote","Cipolla","Aglio","Funghi champignon","Asparagi","Carciofi","Cavolo nero","Patate"]},{"id":"tutti","label":"Tutti","icon":"ti-list","names":[],"special":"tutti"}];
+  const FOOD_CATEGORIES = [{"id":"frequenti","label":"Frequenti","icon":"ti-flame","names":[],"special":"frequenti"},{"id":"miei","label":"Miei","icon":"ti-user","names":[],"special":"miei"},{"id":"bevande","label":"Bevande","icon":"ti-droplet","names":["Latte di soia","Latte di avena","Succo d'arancia","Caffè espresso","Proteina whey"]},{"id":"cereali","label":"Cereali","icon":"ti-bread","names":["Pasta (cotta)","Pane bianco","Pane integrale","Pane di segale","Grissini","Fiocchi d'avena","Crackers","Cornflakes","Farro (cotto)","Orzo (cotto)","Gnocchi","Piadina","Fette biscottate","Riso (cotto)","Pizza margherita"]},{"id":"dolci","label":"Dolci","icon":"ti-cake","names":["Babà al rum","Sfogliatella riccia","Sfogliatella frolla","Millefoglie","Torta caprese","Tiramisù","Cannolo siciliano","Pastiera napoletana","Panna cotta","Crostata di marmellata","Torta della nonna","Zeppole","Struffoli","Panettone","Colomba pasquale","Gelato alla crema","Gelato al cioccolato","Granita al limone","Biscotti secchi","Miele","Marmellata","Cioccolato fondente","Cioccolato al latte","Olio d'oliva","Noci","Mandorle","Arachidi","Burro di arachidi"]},{"id":"frutta","label":"Frutta","icon":"ti-apple","names":["Mela","Banana","Arancia","Kiwi","Fragole","Uva","Pera","Pesca","Anguria","Melone","Mango","Avocado"]},{"id":"latticini","label":"Latticini","icon":"ti-cheese","names":["Latte intero","Latte parzialmente scremato","Yogurt bianco intero","Yogurt greco","Mozzarella","Parmigiano Reggiano","Ricotta","Pecorino","Grana Padano","Burro","Fiordilatte"]},{"id":"legumi","label":"Legumi","icon":"ti-leaf","names":["Ceci (cotti)","Lenticchie (cotte)","Fagioli (cotti)","Piselli","Edamame","Tofu"]},{"id":"piatti","label":"Piatti pronti","icon":"ti-salad","names":["Spaghetti al pomodoro","Pasta al ragù","Pasta al forno","Spaghetti carbonara","Pasta all'amatriciana","Pasta cacio e pepe","Risotto ai funghi","Risotto alla milanese","Lasagna","Parmigiana di melanzane","Ciambotta napoletana","Caponata siciliana","Minestrone","Ribollita","Pollo alla cacciatora","Cotoletta alla milanese","Saltimbocca alla romana","Ossobuco","Polpette al sugo","Frittata di verdure","Supplì","Arancino","Focaccia","Calzone","Insalata caprese","Bruschetta al pomodoro","Pizza margherita"]},{"id":"proteine","label":"Proteine","icon":"ti-meat","names":["Petto di pollo","Coscia di pollo","Manzo (macinato)","Manzo (fesa)","Vitello","Maiale (lonza)","Salmone","Tonno al naturale","Tonno sott'olio","Merluzzo","Branzino","Orata","Gamberetti","Uovo intero","Albume d'uovo","Prosciutto crudo","Prosciutto cotto","Bresaola","Salame Milano","Mortadella","Speck"]},{"id":"verdure","label":"Verdure","icon":"ti-carrot","names":["Pomodoro","Insalata mista","Spinaci","Zucchine","Melanzane","Peperoni","Broccoli","Cavolfiore","Carote","Cipolla","Aglio","Funghi champignon","Asparagi","Carciofi","Cavolo nero","Patate"]},{"id":"tutti","label":"Tutti","icon":"ti-list","names":[],"special":"tutti"}];
 
   function getCatForFood(name) {
     for (const cat of FOOD_CATEGORIES) {
@@ -1195,9 +1195,31 @@
     return catalog.filter(it => cat.names && cat.names.includes(it.name)).length;
   }
 
+  let recentExpanded = false;
+
   function renderCategoryGrid() {
     const wrap = document.getElementById('foodList');
     wrap.innerHTML = '';
+    // Recent section: last 5 added by user (by index, descending)
+    const recent = catalog.map((it,idx)=>({...it,idx})).slice(-5).reverse();
+    if (recent.length) {
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex;align-items:center;cursor:pointer;user-select:none;margin-bottom:4px';
+      header.onclick = () => { recentExpanded = !recentExpanded; renderFoodList(); };
+      const lbl = document.createElement('div');
+      lbl.className = 'food-section-label';
+      lbl.style.cssText = 'padding:10px 0 8px;cursor:pointer';
+      lbl.textContent = 'aggiunti di recente';
+      const arrow = document.createElement('span');
+      arrow.style.cssText = 'font-size:8px;color:var(--muted);margin-left:5px;vertical-align:middle';
+      arrow.textContent = recentExpanded ? '▲' : '▼';
+      lbl.appendChild(arrow);
+      header.appendChild(lbl);
+      wrap.appendChild(header);
+      if (recentExpanded) {
+        recent.forEach(it => wrap.appendChild(makeItem(it)));
+      }
+    }
     const grid = document.createElement('div');
     grid.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:4px 0 8px';
     FOOD_CATEGORIES.forEach(cat => {
