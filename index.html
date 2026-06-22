@@ -79,6 +79,7 @@
     95%  { opacity: 0.3; }
     100% { transform: scale(10);   opacity: 0; }
   }
+  @keyframes ptr-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes splashFade {
     0%   { opacity: 1; }
     85%  { opacity: 1; }
@@ -114,9 +115,9 @@
   }
   .nav-tab {
     display: flex; align-items: center; justify-content: center;
-    width: 52px; height: 36px; border-radius: 999px;
+    width: 64px; height: 44px; border-radius: 999px;
     background: none; border: none;
-    color: var(--muted); font-size: 20px; cursor: pointer;
+    color: var(--muted); font-size: 22px; cursor: pointer;
     transition: all 0.15s;
   }
   .nav-tab.active { background: var(--accent); color: #0f0f0f; }
@@ -1485,17 +1486,48 @@
     navigator.serviceWorker.register('sw.js');
   }
 
-  // Pull-to-refresh
-  let ptStart = 0;
-  document.addEventListener('touchstart', e => {
-    if (window.scrollY === 0) ptStart = e.touches[0].clientY;
-  }, { passive: true });
-  document.addEventListener('touchend', e => {
-    if (ptStart === 0) return;
-    const delta = e.changedTouches[0].clientY - ptStart;
-    if (delta > 80) window.location.reload();
-    ptStart = 0;
-  }, { passive: true });
+  // Pull-to-refresh per PWA iOS
+  (function() {
+    const ptr = document.createElement('div');
+    ptr.style.cssText = 'position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;z-index:9999;pointer-events:none;overflow:hidden;height:0;transition:height 0.2s ease;';
+    ptr.innerHTML = `<svg width="32" height="32" viewBox="-110 -110 220 220" xmlns="http://www.w3.org/2000/svg" style="opacity:0;transition:opacity 0.2s,transform 0.2s">
+      <path d="M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.8" transform="translate(0,-6)"/>
+      <path d="M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.8" transform="rotate(180) translate(0,-6)"/>
+      <path d="M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.8" transform="rotate(270) translate(0,-6)"/>
+      <path d="M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.8" transform="rotate(90) translate(0,-6)"/>
+    </svg>`;
+    document.body.appendChild(ptr);
+    const svg = ptr.querySelector('svg');
+    let startY = 0, pulling = false, triggered = false;
+    const MAX = 80;
+
+    document.addEventListener('touchstart', e => {
+      if (window.scrollY === 0) { startY = e.touches[0].clientY; pulling = true; triggered = false; }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+      if (!pulling) return;
+      const delta = Math.max(0, e.touches[0].clientY - startY);
+      const pct = Math.min(delta / MAX, 1);
+      ptr.style.height = (pct * 64) + 'px';
+      svg.style.opacity = pct;
+      svg.style.transform = `rotate(${pct * 180}deg) scale(${0.5 + pct * 0.5})`;
+      triggered = delta >= MAX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      if (!pulling) return;
+      pulling = false;
+      if (triggered) {
+        svg.style.animation = 'ptr-spin 0.4s linear infinite';
+        setTimeout(() => window.location.reload(), 400);
+      } else {
+        ptr.style.height = '0';
+        svg.style.opacity = '0';
+      }
+      startY = 0;
+    }, { passive: true });
+  })();
 
   setTimeout(()=>{ const s=document.getElementById('splash'); if(s) s.remove(); }, 1850);
 </script>
