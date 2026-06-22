@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Logger</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-110 -110 220 220'><path d='M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.85' transform='translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.85' transform='rotate(180) translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.85' transform='rotate(270) translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.85' transform='rotate(90) translate(0,-6)'/></svg>" type="image/svg+xml">
 <link rel="icon" href="icon-transparent.png" type="image/png">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-110 -110 220 220'><rect x='-110' y='-110' width='220' height='220' fill='%230f0f0f'/><path d='M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.9' transform='translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.9' transform='rotate(180) translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.9' transform='rotate(270) translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.9' transform='rotate(90) translate(0,-6)'/></svg>" type="image/svg+xml">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f0f0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -41,7 +41,6 @@
     --muted: #aeaeb2;
     --green-grad: linear-gradient(135deg, #c8f5e8, #a8ecd4);
   }
-  html[data-theme="light"] .big-add-btn:hover { background: #e5e5ea; }
   html[data-theme="light"] .nav-tab.active { background: #e5e5ea; }
   html[data-theme="light"] .report-stat-card .rs-val { color: var(--text); }
   html[data-theme="light"] .food-item-name { color: var(--text); }
@@ -145,19 +144,19 @@
   /* BIG ADD BUTTON */
   .big-add-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
   .big-add-outer {
-    width: 30%; aspect-ratio: 1.6/1; border-radius: 16px;
+    width: 20%; aspect-ratio: 1.30/1; border-radius: 16px;
     padding: 2px;
     background: conic-gradient(var(--accent) 0% var(--kcal-pct, 0%), var(--border) var(--kcal-pct, 0%) 100%);
     transition: --kcal-pct 0.4s ease;
   }
   .big-add-btn {
     width: 100%; height: 100%; border-radius: 14px;
-    background: var(--surface); border: none;
-    color: var(--accent); font-size: 36px; font-weight: 200;
+    background: var(--bg); border: none;
+    color: var(--accent); font-size: 36px; font-weight: 530;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: background 0.2s;
   }
-  .big-add-btn:hover { background: #222; }
+  .big-add-btn:hover { background: var(--bg); }
   .big-add-btn:active { transform: scale(0.95); }
 
   /* DATE TABS */
@@ -607,7 +606,7 @@
     </div>
   </div>
   <div class="footer" style="margin-top:8px">
-    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.9</div>
+    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.5</div>
     <a href="https://github.com/cloveloper" target="_blank">made with ♡ by clovis</a>
   </div>
 </div>
@@ -671,25 +670,25 @@
 </div>
 
 <!-- CONFIRM RESTORE CATALOG -->
-<div class="confirm-overlay" id="restoreOverlay">
+<div class="confirm-overlay" id="restoreOverlay" onclick="if(event.target===this)document.getElementById('restoreOverlay').classList.remove('open')">
   <div class="confirm-box">
     <div class="confirm-title">Ripristina catalogo?</div>
-    <div class="confirm-sub">Gli alimenti predefiniti che hai rimosso verranno riaggiunti.<br>I tuoi alimenti personalizzati e tutti i log rimarranno intatti.</div>
+    <div class="confirm-sub">Gli alimenti predefiniti che hai rimosso verranno riaggiunti, ma quelli personalizzati e tutti i log rimarranno intatti.</div>
     <div class="confirm-row">
-      <button class="btn-primary" onclick="confirmRestoreCatalog()">ripristina</button>
+      <button class="btn-primary" style="background:var(--danger);color:#fff" onclick="confirmRestoreCatalog()">ripristina</button>
       <button class="btn-secondary" onclick="document.getElementById('restoreOverlay').classList.remove('open')">annulla</button>
     </div>
   </div>
 </div>
 
 <!-- CONFIRM DELETE -->
-<div class="confirm-overlay" id="confirmOverlay">
+<div class="confirm-overlay" id="confirmOverlay" onclick="if(event.target===this)closeConfirm()">
   <div class="confirm-box">
     <div class="confirm-title">rimuovere questo alimento?</div>
     <div class="confirm-sub" id="confirmSub">questa azione non può essere annullata</div>
     <div class="confirm-row">
-      <button class="btn-secondary" onclick="closeConfirm()">annulla</button>
       <button class="btn-primary" style="background:var(--danger);color:#fff" onclick="confirmDelete()">rimuovi</button>
+      <button class="btn-secondary" onclick="closeConfirm()">annulla</button>
     </div>
   </div>
 </div>
@@ -811,10 +810,10 @@
   };
 
   const CARD_BG = {
-    kcal:  { d1:'37,69,96',   d2:'42,80,110',  l1:'218,238,249', l2:'200,228,245' },
-    c:     { d1:'80,64,32',   d2:'90,74,34',   l1:'253,243,216', l2:'250,234,192' },
-    p:     { d1:'62,48,80',   d2:'72,56,94',   l1:'240,232,248', l2:'228,216,240' },
-    g:     { d1:'80,48,48',   d2:'94,56,53',   l1:'253,232,228', l2:'248,216,208' },
+    kcal:  { d1:'37,69,96',   d2:'42,80,110',  l1:'218,238,249', l2:'200,228,245', lb:'100,160,210' },
+    c:     { d1:'80,64,32',   d2:'90,74,34',   l1:'253,243,216', l2:'250,234,192', lb:'180,140,40'  },
+    p:     { d1:'62,48,80',   d2:'72,56,94',   l1:'240,232,248', l2:'228,216,240', lb:'140,110,180' },
+    g:     { d1:'80,48,48',   d2:'94,56,53',   l1:'253,232,228', l2:'248,216,208', lb:'200,110,100' },
   };
 
   function applyCardGradient(key, ratio) {
@@ -826,18 +825,18 @@
     const col2 = isLight ? c.l2 : c.d2;
     const minA = 0.15;
     const a = p <= 0 ? minA : Math.round((minA + p * (isLight ? 0.84 : 0.79)) * 100) / 100;
+    const borderCol = isLight ? c.lb : col1;
     if (p <= 0) {
       card.style.background = `linear-gradient(135deg, rgba(${col1},${minA}), rgba(${col2},${minA}))`;
-      card.style.borderColor = '';
+      card.style.borderColor = `rgba(${borderCol}, ${isLight ? 0.5 : 0.25})`;
       return;
     }
     card.style.background = `linear-gradient(135deg, rgba(${col1},${a}), rgba(${col2},${a}))`;
-    // border: interpolate from var(--border) to target
     if (p >= 1) {
       card.classList.add('complete');
     } else {
       card.classList.remove('complete');
-      card.style.borderColor = `rgba(${col1}, ${Math.min(p * 1.5, 0.6)})`;
+      card.style.borderColor = `rgba(${borderCol}, ${Math.min(p * (isLight ? 1.2 : 1.5), 0.7)})`;
     }
   }
 
@@ -878,21 +877,25 @@
       wb.style.background=`linear-gradient(to right, #3a9878 0% ${excessPct}%, var(--water-text) ${excessPct}% 100%)`;
     }
     wb.classList.remove('over');
-    // progressive water card — uses --water color (212,207,200)
+    // progressive water card
     const waterCard = document.getElementById('card-water');
     const wRatio = Math.min(wml/wmax, 1);
+    const isLightW = document.documentElement.getAttribute('data-theme') === 'light';
+    const waterRgb = '100,210,180';
+    const waterBorderRgb = isLightW ? '30,160,120' : '100,210,180';
+    const minAW = 0.15;
     if (wRatio <= 0) {
-      waterCard.style.background = 'rgba(100,210,180,0.15)';
-      waterCard.style.borderColor = '';
+      waterCard.style.background = `rgba(${waterRgb},${minAW})`;
+      waterCard.style.borderColor = `rgba(${waterBorderRgb},${isLightW ? 0.5 : 0.25})`;
       waterCard.classList.remove('complete');
     } else if (wRatio >= 1) {
       waterCard.style.background = '';
       waterCard.style.borderColor = '';
       waterCard.classList.add('complete');
     } else {
-      const a = Math.round(wRatio * 0.55 * 100) / 100;
-      waterCard.style.background = `rgba(100,210,180,${a})`;
-      waterCard.style.borderColor = `rgba(100,210,180,${Math.min(wRatio * 1.2, 0.5)})`;
+      const a = Math.round((minAW + wRatio * 0.5) * 100) / 100;
+      waterCard.style.background = `rgba(${waterRgb},${a})`;
+      waterCard.style.borderColor = `rgba(${waterBorderRgb},${Math.min(wRatio * (isLightW ? 1.2 : 1.2), 0.7)})`;
       waterCard.classList.remove('complete');
     }
     // update big-add kcal progress ring
@@ -1402,6 +1405,7 @@
     currentTheme = t;
     localStorage.setItem('caltheme', t);
     applyTheme(t);
+    render();
   }
 
   let _fiCtx = null;
@@ -1667,6 +1671,19 @@
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
   }
+
+  // Tap on empty area in search to clear search and go back to categories
+  document.getElementById('page-search').addEventListener('click', e => {
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) return; // only when searching
+    const foodList = document.getElementById('foodList');
+    const searchBar = document.querySelector('.search-bar-row');
+    if (!foodList.contains(e.target) && !searchBar.contains(e.target)) {
+      document.getElementById('searchInput').value = '';
+      activeCat = null;
+      renderFoodList();
+    }
+  });
 
   // Swipe right to go back in catalog with visual feedback
   (function() {
