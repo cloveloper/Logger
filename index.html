@@ -1483,6 +1483,7 @@
     if (e.target===document.getElementById('foodInfoOverlay')) document.getElementById('foodInfoOverlay').classList.remove('open');
   }
   function saveGoalsFromProfile() {
+    const kcal = parseFloat(document.getElementById('goal-kcal').value);
     const c    = parseFloat(document.getElementById('goal-c').value);
     const p    = parseFloat(document.getElementById('goal-p').value);
     const g    = parseFloat(document.getElementById('goal-g').value);
@@ -1664,7 +1665,7 @@
 
   document.addEventListener('keydown',e=>{
     if (e.key==='Enter'){
-      if (document.getElementById('catPanel').classList.contains('open')) saveCatItem();
+      if (document.getElementById('catOverlay').classList.contains('open')) saveCatItem();
     }
   });
 
