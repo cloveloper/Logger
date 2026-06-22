@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Logger</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-110 -110 220 220'><rect x='-110' y='-110' width='220' height='220' fill='%230f0f0f'/><path d='M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.9' transform='translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.9' transform='rotate(180) translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.9' transform='rotate(270) translate(0,-6)'/><path d='M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z' fill='%23add0f0' opacity='0.9' transform='rotate(90) translate(0,-6)'/></svg>" type="image/svg+xml">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f0f0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -56,7 +57,7 @@
     display: flex; align-items: center; justify-content: center;
     animation: splashFade 1.8s ease forwards;
   }
-  .splash-content { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; z-index: 2; animation: textAppear 1.4s ease-out 0.8s both; }
+  .splash-content { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; z-index: 2; animation: textAppear 1.4s ease-out 0.7s both; }
   @keyframes textAppear {
     0%   { opacity: 0; }
     100% { opacity: 1; }
@@ -70,7 +71,7 @@
   }
   #splash-clover {
     position: absolute; z-index: 1;
-    animation: cloverBurst 0.9s cubic-bezier(0.4, 0, 1, 0.2) 0.6s both;
+    animation: cloverBurst 0.9s cubic-bezier(0.4, 0, 1, 0.2) 0.3s both;
     pointer-events: none;
   }
   @keyframes cloverBurst {
@@ -87,7 +88,7 @@
   }
 
   /* PAGES */
-  .page { display: none; flex-direction: column; min-height: calc(100vh - var(--tab-h)); padding: 24px 16px calc(140px + env(safe-area-inset-bottom)); max-width: 520px; margin: 0 auto; }
+  .page { display: none; flex-direction: column; min-height: calc(100vh - var(--tab-h)); padding: 24px 16px calc(180px + env(safe-area-inset-bottom)); max-width: 520px; margin: 0 auto; }
   .page.active { display: flex; }
 
   /* BOTTOM NAV */
@@ -602,7 +603,7 @@
     </div>
   </div>
   <div class="footer" style="margin-top:8px">
-    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.5</div>
+    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.9</div>
     <a href="https://github.com/cloveloper" target="_blank">made with ♡ by clovis</a>
   </div>
 </div>
@@ -1490,7 +1491,7 @@
   (function() {
     const ptr = document.createElement('div');
     ptr.style.cssText = 'position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;z-index:9999;pointer-events:none;overflow:hidden;height:0;transition:height 0.2s ease;';
-    ptr.innerHTML = `<svg width="32" height="32" viewBox="-110 -110 220 220" xmlns="http://www.w3.org/2000/svg" style="opacity:0;transition:opacity 0.2s,transform 0.2s">
+    ptr.innerHTML = `<svg width="48" height="48" viewBox="-110 -110 220 220" xmlns="http://www.w3.org/2000/svg" style="opacity:0;transition:opacity 0.2s,transform 0.2s">
       <path d="M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.8" transform="translate(0,-6)"/>
       <path d="M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.8" transform="rotate(180) translate(0,-6)"/>
       <path d="M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.8" transform="rotate(270) translate(0,-6)"/>
