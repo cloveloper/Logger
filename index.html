@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Logger</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍀</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Logger">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -47,9 +53,13 @@
   #splash {
     position: fixed; inset: 0; background: var(--bg); z-index: 999;
     display: flex; align-items: center; justify-content: center;
-    animation: splashFade 1.5s ease forwards;
+    animation: splashFade 1.8s ease forwards;
   }
-  .splash-content { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .splash-content { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; z-index: 2; animation: textAppear 1.4s ease-out 0.8s both; }
+  @keyframes textAppear {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
   .splash-title {
     font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 36px;
     color: var(--accent); letter-spacing: 0.01em;
@@ -57,9 +67,20 @@
   .splash-by {
     font-size: 11px; letter-spacing: 0.05em; color: var(--muted);
   }
+  #splash-clover {
+    position: absolute; z-index: 1;
+    animation: cloverBurst 0.9s cubic-bezier(0.4, 0, 1, 0.2) 0.6s both;
+    pointer-events: none;
+  }
+  @keyframes cloverBurst {
+    0%   { transform: scale(1);    opacity: 0.45; }
+    60%  { transform: scale(0.78); opacity: 0.5; }
+    95%  { opacity: 0.3; }
+    100% { transform: scale(10);   opacity: 0; }
+  }
   @keyframes splashFade {
     0%   { opacity: 1; }
-    60%  { opacity: 1; }
+    85%  { opacity: 1; }
     100% { opacity: 0; visibility: hidden; }
   }
 
@@ -243,8 +264,6 @@
   .food-add-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 18px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
   .food-add-btn:hover { border-color: var(--accent); color: var(--accent); }
   .food-add-btn.done { border-color: #2d6b2d; color: #5fba5f; }
-  .food-edit-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 13px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
-  .food-edit-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* CATALOG ADD PANEL */
   .cat-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; display: none; flex-direction: column; gap: 10px; }
@@ -317,9 +336,19 @@
 <body>
 
 <div id="splash">
+  <svg id="splash-clover" width="220" height="220" viewBox="-110 -110 220 220" xmlns="http://www.w3.org/2000/svg">
+    <!-- top leaf (shorter) -->
+    <path d="M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.25" transform="translate(0,-6)"/>
+    <!-- bottom leaf (shorter) -->
+    <path d="M0,0 C-6,-2 -48,2 -48,-38 C-48,-74 -22,-89 0,-74 C22,-89 48,-74 48,-38 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.25" transform="rotate(180) translate(0,-6)"/>
+    <!-- left leaf (longer) -->
+    <path d="M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.25" transform="rotate(270) translate(0,-6)"/>
+    <!-- right leaf (longer) -->
+    <path d="M0,0 C-6,-2 -48,2 -48,-44 C-48,-82 -22,-98 0,-82 C22,-98 48,-82 48,-44 C48,2 6,-2 0,0 Z" fill="#add0f0" opacity="0.25" transform="rotate(90) translate(0,-6)"/>
+  </svg>
   <div class="splash-content">
     <span class="splash-title">Logger</span>
-    <span class="splash-by">by clovis</span>
+    
   </div>
 </div>
 
@@ -564,7 +593,7 @@
     </div>
   </div>
   <div class="footer" style="margin-top:8px">
-    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.8</div>
+    <div style="color:var(--muted);font-size:11px;margin-bottom:4px">Logger v1.9</div>
     <a href="https://github.com/cloveloper" target="_blank">made with ♡ by clovis</a>
   </div>
 </div>
@@ -956,17 +985,17 @@
     setCatUnit('g');
     updateCatPanelMode();
     document.getElementById('catOverlay').classList.add('open');
-    setTimeout(()=>document.getElementById('catName').focus(), 100);
+    setTimeout(()=>{ const el=document.getElementById('catName'); el.removeAttribute('readonly'); el.focus(); }, 100);
   }
   function openCatEditPanel(idx) {
     const item = catalog[idx];
     catEditIndex = idx;
     catPanelOpen = true;
     document.getElementById('catName').value = item.name;
-    document.getElementById('catKcal').value = round2(item.kcal*100);
-    document.getElementById('catC').value = round2(item.c*100);
-    document.getElementById('catP').value = round2(item.p*100);
-    document.getElementById('catG').value = round2(item.g*100);
+    document.getElementById('catKcal').value = item.kcal ? round2(item.kcal*100) : '';
+    document.getElementById('catC').value = item.c ? round2(item.c*100) : '';
+    document.getElementById('catP').value = item.p ? round2(item.p*100) : '';
+    document.getElementById('catG').value = item.g ? round2(item.g*100) : '';
     document.getElementById('catDefaultG').value = item.defaultG || '';
     setCatUnit(item.unit || 'g');
     updateCatPanelMode();
@@ -1053,7 +1082,7 @@
 
     const allSuggested=items.filter(it=>it.score>0).sort((a,b)=>b.score-a.score).slice(0,5);
     // always show all items in "tutti", freq status doesn't exclude them
-    const rest=items.sort((a,b)=>b.idx-a.idx);
+    const rest=items.sort((a,b)=>{ const ai=isIncomplete(a)?1:0, bi=isIncomplete(b)?1:0; if(bi!==ai) return bi-ai; return b.idx-a.idx; });
 
     function makeItem(item, showBadge=false) {
       const div=document.createElement('div');
@@ -1070,7 +1099,6 @@
           <div class="food-item-macros"><span class="fc">C${cPer100}</span> · <span class="fp">P${pPer100}</span> · <span class="fg">G${gPer100}</span> /100g</div>
         </div>
         <div class="food-item-kcal">${kcalPer100}<br><span style="font-size:8px;color:var(--muted)">kcal/100g</span></div>
-        <button class="food-edit-btn" onclick="openCatEditPanel(${item.idx})">✎</button>
         <button class="food-add-btn" onclick="openQtySheet(${item.idx})">+</button>`;
       return div;
     }
@@ -1161,6 +1189,7 @@
     freq[item.name]=(freq[item.name]||0)+1;
     saveFreq(); saveLog();
     closeQtySheetDirect();
+    document.getElementById('searchInput').value = '';
     render(); renderFoodList();
   }
   function closeQtySheet(e) { if (e.target===document.getElementById('qtyOverlay')) closeQtySheetDirect(); }
@@ -1442,7 +1471,11 @@
   render();
   renderFoodList();
 
-  setTimeout(()=>{ const s=document.getElementById('splash'); if(s) s.remove(); }, 1550);
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+
+  setTimeout(()=>{ const s=document.getElementById('splash'); if(s) s.remove(); }, 1850);
 </script>
 </body>
 </html>
